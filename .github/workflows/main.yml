@@ -17,12 +17,11 @@ jobs:
     - name: Set up SSH
       uses: webfactory/ssh-agent@v0.5.4
       with:
-        ssh-private-key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
+        ssh-private-key: ${{ secrets.EC2GH }}
 
     - name: Deploy to EC2
       run: |
-        ssh -o StrictHostKeyChecking=no ec2-user@your-ec2-instance-ip << 'EOF'
-          cd /path/to/your/app
+        ssh -o StrictHostKeyChecking=no ec2-user@16.171.237.24<< 'EOF'
           git pull origin main
           # Restart the Dash app; replace with your command
           sudo systemctl restart dash-app.service
