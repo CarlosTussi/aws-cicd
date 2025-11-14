@@ -3,11 +3,12 @@ name: Deploy to EC2 and Restart Dash App
 on:
   push:
     branches:
-      - main 
+      - main  # or your deployment branch
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    environment: AWS
 
     steps:
     - name: Checkout code
@@ -21,11 +22,8 @@ jobs:
     - name: Deploy to EC2
       run: |
         ssh -o StrictHostKeyChecking=no ec2-user@your-ec2-instance-ip << 'EOF'
-          cd /aws-cicd
+          cd /path/to/your/app
           git pull origin main
-          source venv/bin/activate
-          # Install any new dependencies if needed
-          pip install -r requirements.txt
-          # Restart the Dash app, running inside the virtualenv if needed
+          # Restart the Dash app; replace with your command
           sudo systemctl restart dash-app.service
         EOF
