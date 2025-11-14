@@ -22,6 +22,7 @@ jobs:
     - name: Deploy to EC2
       run: |
         ssh -o StrictHostKeyChecking=no ec2-user@16.171.237.24<< 'EOF'
+          cd aws-cicd/
           git pull origin main
           # Restart the Dash app; replace with your command
           sudo systemctl restart dash-app.service
