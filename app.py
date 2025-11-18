@@ -1,5 +1,41 @@
 import dash
 from dash import dcc, html, Input, Output
+import boto3
+from botocore.exceptions import ClientError
+import os
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
+
+# Initialize AWS S3 client using default credential chain
+# On EC2, this will automatically use the IAM role credentials
+aws_region = os.getenv('AWS_REGION', 'us-east-1')
+s3_bucket_name = os.getenv('S3_BUCKET_NAME')
+
+# Initialize S3 client using default credential chain
+# This automatically uses:
+# - IAM role credentials (when running on EC2/Lambda)
+# - Environment variables (if set)
+# - ~/.aws/credentials (for local development)
+s3_client = None
+try:
+    s3_client = boto3.client('s3', region_name=aws_region)
+    # Test connection by checking if bucket exists (optional)
+    if s3_bucket_name:
+        s3_client.head_bucket(Bucket=s3_bucket_name)
+except ClientError as e:
+    error_code = e.response.get('Error', {}).get('Code', '')
+    if error_code == '404':
+        print(f"Bucket '{s3_bucket_name}' not found")
+    elif error_code == '403':
+        print(f"Access denied to bucket '{s3_bucket_name}'. Check IAM role permissions.")
+    else:
+        print(f"Error accessing S3: {e}")
+    s3_client = None
+except Exception as e:
+    print(f"Error initializing S3 client: {e}")
+    s3_client = None
 
 # Initialize the Dash app
 app = dash.Dash(__name__)
@@ -30,8 +66,53 @@ app.layout = html.Div([
                 style={'width': '100%', 'minHeight': '100px', 'padding': '15px',
                        'backgroundColor': '#f0f0f0', 'borderRadius': '5px',
                        'marginTop': '10px', 'fontSize': '16px', 'whiteSpace': 'pre-wrap'})
+    ], style={'width': '80%', 'margin': '0 auto', 'marginTop': '30px'}),
+    
+    html.Div([
+        html.H3("S3 Bucket Images:", style={'fontSize': '18px', 'marginTop': '30px'}),
+        html.Div(id='s3-images', 
+                style={'width': '100%', 'padding': '15px',
+                       'backgroundColor': '#f0f0f0', 'borderRadius': '5px',
+                       'marginTop': '10px'})
     ], style={'width': '80%', 'margin': '0 auto', 'marginTop': '30px'})
 ], style={'fontFamily': 'Arial, sans-serif', 'maxWidth': '800px', 'margin': '0 auto', 'padding': '20px'})
+
+# Function to get image URLs from S3 bucket
+def get_s3_images():
+    """Retrieve image URLs from S3 bucket"""
+    if not s3_client or not s3_bucket_name:
+        return []
+    
+    image_extensions = ['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp', '.svg']
+    image_urls = []
+    
+    try:
+        # List objects in the bucket
+        response = s3_client.list_objects_v2(Bucket=s3_bucket_name)
+        
+        if 'Contents' in response:
+            for obj in response['Contents']:
+                key = obj['Key']
+                # Check if the object is an image
+                if any(key.lower().endswith(ext) for ext in image_extensions):
+                    # Generate presigned URL (valid for 1 hour)
+                    try:
+                        url = s3_client.generate_presigned_url(
+                            'get_object',
+                            Params={'Bucket': s3_bucket_name, 'Key': key},
+                            ExpiresIn=3600
+                        )
+                        image_urls.append({'url': url, 'key': key})
+                    except ClientError as e:
+                        print(f"Error generating presigned URL for {key}: {e}")
+    except ClientError as e:
+        print(f"Error accessing S3 bucket: {e}")
+        return []
+    except Exception as e:
+        print(f"Unexpected error: {e}")
+        return []
+    
+    return image_urls
 
 # Define the callback to process the text
 @app.callback(
@@ -45,6 +126,44 @@ def process_text(n_clicks, input_value):
         processed = input_value.replace('a', '@').replace('i', '!').replace('e', '&')
         return processed
     return ""
+
+# Define the callback to display S3 images
+@app.callback(
+    Output('s3-images', 'children'),
+    Input('process-button', 'n_clicks')
+)
+def display_s3_images(n_clicks):
+    """Display images from S3 bucket"""
+    images = get_s3_images()
+    
+    if not images:
+        if not s3_client or not s3_bucket_name:
+            return html.Div("Please configure S3_BUCKET_NAME in .env file. Ensure EC2 instance has IAM role with S3 permissions.",
+                          style={'color': '#666', 'fontSize': '14px', 'padding': '10px'})
+        return html.Div("No images found in the S3 bucket.",
+                      style={'color': '#666', 'fontSize': '14px', 'padding': '10px'})
+    
+    # Create image gallery
+    image_elements = []
+    for img in images:
+        image_elements.append(
+            html.Div([
+                html.Img(
+                    src=img['url'],
+                    style={
+                        'width': '100%',
+                        'maxWidth': '300px',
+                        'height': 'auto',
+                        'margin': '10px',
+                        'borderRadius': '5px',
+                        'boxShadow': '0 2px 4px rgba(0,0,0,0.1)'
+                    }
+                ),
+                html.P(img['key'], style={'fontSize': '12px', 'color': '#666', 'marginTop': '5px', 'textAlign': 'center'})
+            ], style={'display': 'inline-block', 'verticalAlign': 'top', 'margin': '10px'})
+        )
+    
+    return html.Div(image_elements, style={'display': 'flex', 'flexWrap': 'wrap', 'justifyContent': 'center'})
 
 # Run the app
 if __name__ == '__main__':
