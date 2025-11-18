@@ -13,6 +13,10 @@ load_dotenv()
 aws_region = os.getenv('AWS_REGION', 'us-east-1')
 s3_bucket_name = os.getenv('S3_BUCKET_NAME')
 
+# Debug: Print what we loaded (remove in production)
+print(f"DEBUG: AWS_REGION = {aws_region}")
+print(f"DEBUG: S3_BUCKET_NAME = {s3_bucket_name}")
+
 # Initialize S3 client using default credential chain
 # This automatically uses:
 # - IAM role credentials (when running on EC2/Lambda)
@@ -21,20 +25,29 @@ s3_bucket_name = os.getenv('S3_BUCKET_NAME')
 s3_client = None
 try:
     s3_client = boto3.client('s3', region_name=aws_region)
-    # Test connection by checking if bucket exists (optional)
+    print("DEBUG: S3 client created successfully")
+    
+    # Test connection by checking if bucket exists
     if s3_bucket_name:
-        s3_client.head_bucket(Bucket=s3_bucket_name)
-except ClientError as e:
-    error_code = e.response.get('Error', {}).get('Code', '')
-    if error_code == '404':
-        print(f"Bucket '{s3_bucket_name}' not found")
-    elif error_code == '403':
-        print(f"Access denied to bucket '{s3_bucket_name}'. Check IAM role permissions.")
+        try:
+            s3_client.head_bucket(Bucket=s3_bucket_name)
+            print(f"DEBUG: Successfully connected to bucket '{s3_bucket_name}'")
+        except ClientError as e:
+            error_code = e.response.get('Error', {}).get('Code', '')
+            if error_code == '404':
+                print(f"ERROR: Bucket '{s3_bucket_name}' not found")
+            elif error_code == '403':
+                print(f"ERROR: Access denied to bucket '{s3_bucket_name}'. Check IAM role permissions.")
+            else:
+                print(f"ERROR: {e}")
+            # Don't set s3_client to None here - the client works, just bucket access issue
     else:
-        print(f"Error accessing S3: {e}")
-    s3_client = None
+        print("WARNING: S3_BUCKET_NAME not set in .env file")
 except Exception as e:
-    print(f"Error initializing S3 client: {e}")
+    print(f"ERROR: Failed to initialize S3 client: {e}")
+    print(f"ERROR: Exception type: {type(e).__name__}")
+    import traceback
+    traceback.print_exc()
     s3_client = None
 
 # Initialize the Dash app
