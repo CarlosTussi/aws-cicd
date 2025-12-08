@@ -7,4 +7,4 @@ sys.path.insert(0, os.path.dirname(__file__))
 
 # Import the Flask 'app' instance from your main file
 # CHANGE 'main' to the name of your python file (without .py)
-from main import app as application
+from app import app as application
