@@ -10,7 +10,7 @@ load_dotenv()
 
 # Initialize AWS S3 client using default credential chain
 # On EC2, this will automatically use the IAM role credentials
-aws_region = os.getenv('AWS_REGION', 'us-east-1')
+aws_region = os.getenv('AWS_REGION', 'eu-north-1')
 s3_bucket_name = os.getenv('S3_BUCKET_NAME')
 
 # Debug: Print what we loaded (remove in production)
@@ -180,5 +180,5 @@ def display_s3_images(n_clicks):
 
 # Run the app
 if __name__ == '__main__':
-    app.run_server(debug=True, host='0.0.0.0', port=8050)
+    app.run_server(debug=False, host='0.0.0.0', port=8050)
 
