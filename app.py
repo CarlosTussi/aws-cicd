@@ -69,7 +69,7 @@ app.layout = html.Div([
     html.Div([
         html.Button('Process', id='process-button', n_clicks=0,
                    style={'fontSize': '18px', 'padding': '10px 30px', 'marginTop': '20px',
-                          'backgroundColor': '#4CAF50', 'color': 'white', 'border': 'none',
+                          'backgroundColor': '#4CAF50', 'color': 'orange', 'border': 'none',
                           'borderRadius': '5px', 'cursor': 'pointer'})
     ], style={'textAlign': 'center', 'marginTop': '21px'}),
     
