@@ -71,7 +71,7 @@ app.layout = html.Div([
                    style={'fontSize': '18px', 'padding': '10px 30px', 'marginTop': '20px',
                           'backgroundColor': '#4CAF50', 'color': 'white', 'border': 'none',
                           'borderRadius': '5px', 'cursor': 'pointer'})
-    ], style={'textAlign': 'center', 'marginTop': '20px'}),
+    ], style={'textAlign': 'center', 'marginTop': '21px'}),
     
     html.Div([
         html.H3("Processed Text:", style={'fontSize': '18px', 'marginTop': '30px'}),
