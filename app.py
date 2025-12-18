@@ -77,7 +77,7 @@ app.layout = html.Div([
         html.H3("Processed Text:", style={'fontSize': '18px', 'marginTop': '30px'}),
         html.Div(id='output-text', 
                 style={'width': '100%', 'minHeight': '100px', 'padding': '15px',
-                       'backgroundColor': '#FFA500', 'borderRadius': '5px',
+                       'backgroundColor': '#f0f0f0', 'borderRadius': '5px',
                        'marginTop': '10px', 'fontSize': '32px', 'whiteSpace': 'pre-wrap'})
     ], style={'width': '80%', 'margin': '0 auto', 'marginTop': '30px'}),
     
@@ -85,7 +85,7 @@ app.layout = html.Div([
         html.H3("S3 Bucket Images:", style={'fontSize': '18px', 'marginTop': '30px'}),
         html.Div(id='s3-images', 
                 style={'width': '100%', 'padding': '15px',
-                       'backgroundColor': '#FFA500', 'borderRadius': '5px',
+                       'backgroundColor': '#f0f0f0', 'borderRadius': '5px',
                        'marginTop': '10px'})
     ], style={'width': '80%', 'margin': '0 auto', 'marginTop': '30px'})
 ], style={'fontFamily': 'Arial, sans-serif', 'maxWidth': '800px', 'margin': '0 auto', 'padding': '20px'})
