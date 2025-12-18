@@ -78,7 +78,7 @@ app.layout = html.Div([
         html.Div(id='output-text', 
                 style={'width': '100%', 'minHeight': '100px', 'padding': '15px',
                        'backgroundColor': '#f0f0f0', 'borderRadius': '5px',
-                       'marginTop': '10px', 'fontSize': '16px', 'whiteSpace': 'pre-wrap'})
+                       'marginTop': '10px', 'fontSize': '32px', 'whiteSpace': 'pre-wrap'})
     ], style={'width': '80%', 'margin': '0 auto', 'marginTop': '30px'}),
     
     html.Div([
