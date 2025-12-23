@@ -187,7 +187,7 @@ app.index_string = '''
                 font-weight: 400;
                 margin-bottom: 20px;
                 color: #2d3748;
-                display: block;
+                display: block; 
             }
             
             .textarea {
