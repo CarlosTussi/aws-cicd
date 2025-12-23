@@ -183,7 +183,7 @@ app.index_string = '''
             }
             
             .label {
-                font-size: 1.1rem;
+                font-size: 1.1rem; 
                 font-weight: 400;
                 margin-bottom: 20px;
                 color: #2d3748;
